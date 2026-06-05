@@ -29,8 +29,8 @@ export default function Paiements() {
       if (filterMois)  params.mois  = filterMois;
       if (filterAnnee) params.annee = filterAnnee;
       const [pa, at] = await Promise.all([paiementsAPI.getAll(params), attributionsAPI.getAll()]);
-      setPaiements(pa.data);
-      setAttributions(at.data);
+      setPaiements(Array.isArray(pa.data) ? pa.data : []);
+      setAttributions(Array.isArray(at.data) ? at.data : []);
     } catch (e) { toast.error(e.message); }
     finally     { setLoading(false); }
   }, [filterMois, filterAnnee]);

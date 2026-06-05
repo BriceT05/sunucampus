@@ -27,9 +27,9 @@ export default function Attributions() {
         etudiantsAPI.getAll(),
         chambresAPI.getAll({ etat: 'disponible' }),
       ]);
-      setAttributions(at.data);
-      setEtudiants(et.data.filter(e => !e.num_chambre));
-      setChambres(ch.data);
+      setAttributions(Array.isArray(at.data) ? at.data : []);
+      setEtudiants(Array.isArray(et.data) ? et.data.filter(e => !e.num_chambre) : []);
+      setChambres(Array.isArray(ch.data) ? ch.data : []);
     } catch (e) { toast.error(e.message); }
     finally     { setLoading(false); }
   }, []);

@@ -31,8 +31,8 @@ export default function Chambres() {
       if (filterEtat)params.etat   = filterEtat;
       if (filterBat) params.id_bat = filterBat;
       const [ch, bt] = await Promise.all([chambresAPI.getAll(params), batimentsAPI.getAll()]);
-      setChambres(ch.data);
-      setBatiments(bt.data);
+      setChambres(Array.isArray(ch.data) ? ch.data : []);
+      setBatiments(Array.isArray(bt.data) ? bt.data : []);
     } catch (e) { toast.error(e.message); }
     finally     { setLoading(false); }
   }, [search, filterEtat, filterBat]);
@@ -67,7 +67,8 @@ export default function Chambres() {
     finally     { setDeleting(false); }
   };
 
-  const counts = ETATS.reduce((acc, e) => ({ ...acc, [e]: chambres.filter(c => c.etat === e).length }), {});
+  const chambresList = Array.isArray(chambres) ? chambres : [];
+  const counts = ETATS.reduce((acc, e) => ({ ...acc, [e]: chambresList.filter(c => c.etat === e).length }), {});
 
   const etatColor = {
     disponible:  'bg-emerald-400',
@@ -112,14 +113,14 @@ export default function Chambres() {
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
           {[...Array(8)].map((_, i) => <div key={i} className="h-44 rounded-2xl bg-slate-200 animate-pulse" />)}
         </div>
-      ) : chambres.length === 0 ? (
+      ) : chambresList.length === 0 ? (
         <div className="card flex flex-col items-center py-20 gap-3">
           <BedDouble size={48} className="text-slate-300" />
           <p className="text-slate-400 text-lg">Aucune chambre trouvée</p>
         </div>
       ) : (
         <div className="grid grid-cols-2 md:grid-cols-3 lg:grid-cols-4 gap-4">
-          {chambres.map(c => (
+          {chambresList.map(c => (
             <div key={c.num_chambre} className="card hover:shadow-md transition-all group overflow-hidden">
               <div className={`h-2 ${etatColor[c.etat] || 'bg-slate-300'}`} />
               <div className="p-4">

@@ -31,8 +31,8 @@ export default function Etudiants() {
       if (filterFiliere) params.filiere = filterFiliere;
       if (filterNiveau)  params.niveau  = filterNiveau;
       const [et, fi] = await Promise.all([etudiantsAPI.getAll(params), etudiantsAPI.getFilieres()]);
-      setEtudiants(et.data);
-      setFilieres(fi.data);
+      setEtudiants(Array.isArray(et.data) ? et.data : []);
+      setFilieres(Array.isArray(fi.data) ? fi.data : []);
     } catch (e) { toast.error(e.message); }
     finally     { setLoading(false); }
   }, [search, filterFiliere, filterNiveau]);

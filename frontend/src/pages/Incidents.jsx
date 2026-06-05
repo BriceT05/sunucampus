@@ -29,8 +29,8 @@ export default function Incidents() {
       if (filterStatut) params.statut   = filterStatut;
       if (filterPrio)   params.priorite = filterPrio;
       const [inc, ch] = await Promise.all([incidentsAPI.getAll(params), chambresAPI.getAll()]);
-      setIncidents(inc.data);
-      setChambres(ch.data);
+      setIncidents(Array.isArray(inc.data) ? inc.data : []);
+      setChambres(Array.isArray(ch.data) ? ch.data : []);
     } catch (e) { toast.error(e.message); }
     finally     { setLoading(false); }
   }, [filterStatut, filterPrio]);
@@ -65,7 +65,8 @@ export default function Incidents() {
     finally     { setDeleting(false); }
   };
 
-  const urgentCount = incidents.filter(i => i.priorite === 'urgente' && i.statut !== 'resolu').length;
+  const incidentsList = Array.isArray(incidents) ? incidents : [];
+  const urgentCount = incidentsList.filter(i => i.priorite === 'urgente' && i.statut !== 'resolu').length;
 
   return (
     <div className="space-y-5">
@@ -103,7 +104,7 @@ export default function Incidents() {
       <div className="card overflow-hidden">
         <div className="card-header">
           <h3 className="section-title">Incidents signalés</h3>
-          <span className="badge bg-primary/10 text-primary">{incidents.length}</span>
+          <span className="badge bg-primary/10 text-primary">{incidentsList.length}</span>
         </div>
         <div className="overflow-x-auto">
           <table className="table-auto">
@@ -122,12 +123,12 @@ export default function Incidents() {
             <tbody>
               {loading ? (
                 <tr><td colSpan={8} className="text-center py-12 text-slate-400">Chargement…</td></tr>
-              ) : incidents.length === 0 ? (
+              ) : incidentsList.length === 0 ? (
                 <tr><td colSpan={8}><div className="flex flex-col items-center py-16 gap-3">
                   <AlertTriangle size={40} className="text-slate-300" />
                   <p className="text-slate-400">Aucun incident</p>
                 </div></td></tr>
-              ) : incidents.map(i => (
+              ) : incidentsList.map(i => (
                 <tr key={i.id_incident} className={i.priorite === 'urgente' && i.statut !== 'resolu' ? 'bg-red-50/40' : ''}>
                   <td className="max-w-xs">
                     <p className="text-sm font-semibold text-slate-800 line-clamp-2">{i.description}</p>

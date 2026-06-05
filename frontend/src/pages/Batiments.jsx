@@ -17,7 +17,7 @@ export default function Batiments() {
 
   const load = async () => {
     setLoading(true);
-    try { const r = await batimentsAPI.getAll(); setBatiments(r.data); }
+    try { const r = await batimentsAPI.getAll(); setBatiments(Array.isArray(r.data) ? r.data : []); }
     catch (e) { toast.error(e.message); }
     finally   { setLoading(false); }
   };
