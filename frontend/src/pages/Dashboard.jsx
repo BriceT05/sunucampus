@@ -22,6 +22,13 @@ export default function Dashboard() {
       .finally(() => setLoading(false));
   }, []);
 
+  if (!loading && !stats) return (
+    <div className="flex flex-col items-center justify-center h-64 gap-3">
+      <p className="text-slate-500">Impossible de charger le tableau de bord.</p>
+      <button className="btn-secondary" onClick={() => window.location.reload()}>Réessayer</button>
+    </div>
+  );
+
   if (loading) return (
     <div className="space-y-6">
       <div className="grid grid-cols-2 lg:grid-cols-4 gap-4">
