@@ -1,0 +1,36 @@
+# Dépendances
+node_modules/
+.pnp
+.pnp.js
+
+# Variables d'environnement (NE PAS COMMITTER)
+.env
+.env.local
+.env.*.local
+
+# Build
+dist/
+build/
+.vite/
+
+# Logs
+*.log
+*.err
+npm-debug.log*
+yarn-debug.log*
+yarn-error.log*
+
+# OS
+.DS_Store
+Thumbs.db
+
+# IDE
+.vscode/
+.idea/
+*.suo
+*.ntvs*
+*.njsproj
+*.sln
+
+# Coverage
+coverage/
