@@ -21,18 +21,5 @@ jobs:
           VERCEL_PROJECT_ID: ${{ secrets.VERCEL_FRONTEND_PROJECT_ID }}
         run: |
           npm install -g vercel@latest
-          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
-
-  deploy-backend:
-    name: Deploy Backend
-    runs-on: ubuntu-latest
-    steps:
-      - uses: actions/checkout@v4
-
-      - name: Deploy Backend to Vercel
-        working-directory: backend
-        env:
-          VERCEL_PROJECT_ID: ${{ secrets.VERCEL_BACKEND_PROJECT_ID }}
-        run: |
-          npm install -g vercel@latest
-          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }}
+          vercel deploy --prod --token=${{ secrets.VERCEL_TOKEN }} \
+            --build-env VITE_API_URL=https://sunucampus-backend.onrender.com
