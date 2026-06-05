@@ -5,7 +5,11 @@ const cors = require('cors');
 const app = express();
 const PORT = process.env.PORT || 3001;
 
-app.use(cors({ origin: process.env.FRONTEND_URL || 'http://localhost:5173', credentials: true }));
+const allowedOrigins = (process.env.FRONTEND_URL || 'http://localhost:5173').split(',').map(s => s.trim());
+app.use(cors({
+  origin: (origin, cb) => cb(null, !origin || allowedOrigins.includes(origin) || allowedOrigins.includes('*')),
+  credentials: true,
+}));
 app.use(express.json());
 app.use(express.urlencoded({ extended: true }));
 
@@ -26,6 +30,10 @@ app.use((err, _req, res, _next) => {
   res.status(500).json({ error: 'Erreur interne du serveur' });
 });
 
-app.listen(PORT, () => {
-  console.log(`\n🏛️  SunuCampus API démarrée → http://localhost:${PORT}\n`);
-});
+if (require.main === module) {
+  app.listen(PORT, () => {
+    console.log(`\n🏛️  SunuCampus API démarrée → http://localhost:${PORT}\n`);
+  });
+}
+
+module.exports = app;
