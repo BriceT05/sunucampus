@@ -23,7 +23,7 @@ export default function EtudiantDetail() {
   }, [id]);
 
   if (loading) return <div className="flex items-center justify-center h-64 text-slate-400">Chargement…</div>;
-  if (!data)   return null;
+  if (!data)   return <div className="flex items-center justify-center h-64 text-slate-400">Étudiant introuvable.</div>;
 
   const totalPaye = data.paiements?.reduce((s, p) => s + Number(p.montant), 0) || 0;
   const attribution = data.attributions?.[0];

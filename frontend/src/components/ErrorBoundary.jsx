@@ -8,6 +8,10 @@ export default class ErrorBoundary extends Component {
     return { error };
   }
 
+  componentDidCatch(error, info) {
+    console.error('ErrorBoundary caught:', error, info);
+  }
+
   render() {
     if (this.state.error) return (
       <div className="flex flex-col items-center justify-center h-64 gap-4">

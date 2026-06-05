@@ -10,8 +10,12 @@ router.get('/', async (req, res) => {
         e.nom AS etudiant_nom, e.prenom AS etudiant_prenom
       FROM CHAMBRE c
       JOIN BATIMENT b ON b.id_bat = c.id_bat
-      LEFT JOIN ATTRIBUTION a ON a.num_chambre = c.num_chambre
-      LEFT JOIN ETUDIANT    e ON e.num_etudiant = a.num_etudiant
+      LEFT JOIN (
+        SELECT num_chambre, MIN(num_etudiant) AS num_etudiant
+        FROM ATTRIBUTION
+        GROUP BY num_chambre
+      ) amin ON amin.num_chambre = c.num_chambre
+      LEFT JOIN ETUDIANT e ON e.num_etudiant = amin.num_etudiant
       WHERE 1=1
     `;
     const params = [];
