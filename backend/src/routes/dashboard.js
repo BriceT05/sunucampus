@@ -4,22 +4,22 @@ const db      = require('../config/db');
 
 router.get('/stats', async (_req, res) => {
   try {
-    const [[{ total: totalChambres }]]       = await db.query('SELECT COUNT(*) AS total FROM CHAMBRE');
-    const [[{ total: chambresOccupees }]]    = await db.query("SELECT COUNT(*) AS total FROM CHAMBRE WHERE etat = 'occupee'");
-    const [[{ total: chambresDisponibles }]] = await db.query("SELECT COUNT(*) AS total FROM CHAMBRE WHERE etat = 'disponible'");
-    const [[{ total: incidentsUrgents }]]    = await db.query("SELECT COUNT(*) AS total FROM INCIDENT WHERE priorite = 'urgente' AND statut != 'resolu'");
+    const [[{ total: totalChambres }]]       = await db.query('SELECT COUNT(*) AS total FROM chambre');
+    const [[{ total: chambresOccupees }]]    = await db.query("SELECT COUNT(*) AS total FROM chambre WHERE etat = 'occupee'");
+    const [[{ total: chambresDisponibles }]] = await db.query("SELECT COUNT(*) AS total FROM chambre WHERE etat = 'disponible'");
+    const [[{ total: incidentsUrgents }]]    = await db.query("SELECT COUNT(*) AS total FROM incident WHERE priorite = 'urgente' AND statut != 'resolu'");
 
     const curMois  = new Date().getMonth() + 1;
     const curAnnee = new Date().getFullYear();
 
     const [[{ attendus }]] = await db.query(`
       SELECT COALESCE(SUM(c.loyer_mensuel), 0) AS attendus
-      FROM ATTRIBUTION a
-      JOIN CHAMBRE c ON c.num_chambre = a.num_chambre
+      FROM attribution a
+      JOIN chambre c ON c.num_chambre = a.num_chambre
       WHERE a.date_sortie_prevue >= CURDATE() AND a.date_entree <= CURDATE()
     `);
     const [[{ percus }]] = await db.query(
-      'SELECT COALESCE(SUM(montant), 0) AS percus FROM PAIEMENT_LOYER WHERE mois = ? AND annee = ?',
+      'SELECT COALESCE(SUM(montant), 0) AS percus FROM paiement_loyer WHERE mois = ? AND annee = ?',
       [curMois, curAnnee]
     );
     const loyersImpayesMois = Math.max(0, Number(attendus) - Number(percus));
@@ -31,7 +31,7 @@ router.get('/stats', async (_req, res) => {
           ELT(mois,'Jan','Fév','Mar','Avr','Mai','Jun','Jul','Aoû','Sep','Oct','Nov','Déc'),
           ' ', annee
         ) AS mois_libelle
-      FROM PAIEMENT_LOYER
+      FROM paiement_loyer
       WHERE STR_TO_DATE(CONCAT(annee,'-',LPAD(mois,2,'0'),'-01'),'%Y-%m-%d')
             >= DATE_SUB(CURDATE(), INTERVAL 6 MONTH)
       GROUP BY annee, mois
@@ -41,9 +41,9 @@ router.get('/stats', async (_req, res) => {
     const [alertesRecentes] = await db.query(`
       SELECT i.id_incident, i.description, i.priorite, i.statut, i.date_signalement,
              i.num_chambre, b.nom AS nom_batiment
-      FROM INCIDENT i
-      JOIN CHAMBRE  c ON c.num_chambre = i.num_chambre
-      JOIN BATIMENT b ON b.id_bat      = c.id_bat
+      FROM incident i
+      JOIN chambre  c ON c.num_chambre = i.num_chambre
+      JOIN batiment b ON b.id_bat      = c.id_bat
       WHERE i.statut != 'resolu'
       ORDER BY FIELD(i.priorite,'urgente','moyenne','faible'), i.date_signalement DESC
       LIMIT 5

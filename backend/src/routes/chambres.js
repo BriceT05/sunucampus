@@ -8,14 +8,14 @@ router.get('/', async (req, res) => {
     let sql = `
       SELECT c.*, b.nom AS nom_batiment,
         e.nom AS etudiant_nom, e.prenom AS etudiant_prenom
-      FROM CHAMBRE c
-      JOIN BATIMENT b ON b.id_bat = c.id_bat
+      FROM chambre c
+      JOIN batiment b ON b.id_bat = c.id_bat
       LEFT JOIN (
         SELECT num_chambre, MIN(num_etudiant) AS num_etudiant
-        FROM ATTRIBUTION
+        FROM attribution
         GROUP BY num_chambre
       ) amin ON amin.num_chambre = c.num_chambre
-      LEFT JOIN ETUDIANT e ON e.num_etudiant = amin.num_etudiant
+      LEFT JOIN etudiant e ON e.num_etudiant = amin.num_etudiant
       WHERE 1=1
     `;
     const params = [];
@@ -31,20 +31,20 @@ router.get('/', async (req, res) => {
 router.get('/:id', async (req, res) => {
   try {
     const [[chambre]] = await db.query(`
-      SELECT c.*, b.nom AS nom_batiment FROM CHAMBRE c
-      JOIN BATIMENT b ON b.id_bat = c.id_bat
+      SELECT c.*, b.nom AS nom_batiment FROM chambre c
+      JOIN batiment b ON b.id_bat = c.id_bat
       WHERE c.num_chambre = ?
     `, [req.params.id]);
     if (!chambre) return res.status(404).json({ error: 'Chambre introuvable' });
 
     const [attributions] = await db.query(`
       SELECT a.*, e.nom, e.prenom, e.filiere
-      FROM ATTRIBUTION a JOIN ETUDIANT e ON e.num_etudiant = a.num_etudiant
+      FROM attribution a JOIN etudiant e ON e.num_etudiant = a.num_etudiant
       WHERE a.num_chambre = ? ORDER BY a.date_entree DESC
     `, [req.params.id]);
 
     const [incidents] = await db.query(
-      'SELECT * FROM INCIDENT WHERE num_chambre = ? ORDER BY date_signalement DESC',
+      'SELECT * FROM incident WHERE num_chambre = ? ORDER BY date_signalement DESC',
       [req.params.id]
     );
     res.json({ ...chambre, attributions, incidents });
@@ -56,10 +56,10 @@ router.post('/', async (req, res) => {
   if (!id_bat || !loyer_mensuel) return res.status(400).json({ error: 'id_bat et loyer_mensuel requis' });
   try {
     const [result] = await db.query(
-      'INSERT INTO CHAMBRE (id_bat, type, superficie, loyer_mensuel, etat) VALUES (?,?,?,?,?)',
+      'INSERT INTO chambre (id_bat, type, superficie, loyer_mensuel, etat) VALUES (?,?,?,?,?)',
       [id_bat, type || 'simple', superficie || null, loyer_mensuel, etat || 'disponible']
     );
-    const [[created]] = await db.query('SELECT * FROM CHAMBRE WHERE num_chambre = ?', [result.insertId]);
+    const [[created]] = await db.query('SELECT * FROM chambre WHERE num_chambre = ?', [result.insertId]);
     res.status(201).json(created);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
@@ -68,17 +68,17 @@ router.put('/:id', async (req, res) => {
   const { id_bat, type, superficie, loyer_mensuel, etat } = req.body;
   try {
     await db.query(
-      'UPDATE CHAMBRE SET id_bat=?, type=?, superficie=?, loyer_mensuel=?, etat=? WHERE num_chambre=?',
+      'UPDATE chambre SET id_bat=?, type=?, superficie=?, loyer_mensuel=?, etat=? WHERE num_chambre=?',
       [id_bat, type, superficie, loyer_mensuel, etat, req.params.id]
     );
-    const [[updated]] = await db.query('SELECT * FROM CHAMBRE WHERE num_chambre = ?', [req.params.id]);
+    const [[updated]] = await db.query('SELECT * FROM chambre WHERE num_chambre = ?', [req.params.id]);
     res.json(updated);
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
 
 router.delete('/:id', async (req, res) => {
   try {
-    await db.query('DELETE FROM CHAMBRE WHERE num_chambre = ?', [req.params.id]);
+    await db.query('DELETE FROM chambre WHERE num_chambre = ?', [req.params.id]);
     res.json({ message: 'Chambre supprimée' });
   } catch (err) { res.status(500).json({ error: err.message }); }
 });
