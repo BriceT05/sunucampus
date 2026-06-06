@@ -26,7 +26,7 @@ router.post('/', async (req, res) => {
   if (!num_chambre || !description) return res.status(400).json({ error: 'num_chambre et description requis' });
   try {
     const [result] = await db.query(
-      'INSERT INTO INCIDENT (num_chambre, description, priorite) VALUES (?,?,?)',
+      'INSERT INTO INCIDENT (num_chambre, date_signalement, description, priorite) VALUES (?, CURDATE(), ?, ?)',
       [num_chambre, description, priorite || 'faible']
     );
     const [[created]] = await db.query('SELECT * FROM INCIDENT WHERE id_incident = ?', [result.insertId]);
